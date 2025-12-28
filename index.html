@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title></title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+/* --------------------------------------------------
+   FORCE PRINT TO A4 PORTRAIT
+-------------------------------------------------- */
+@page {
+  size: A4 portrait;
+  margin: 1in;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+  }
+}
+
+/* --------------------------------------------------
+   GLOBAL VARIABLES
+-------------------------------------------------- */
+:root {
+  --primary: #1e88e5;
+  --primary-light: #64b5f6;
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.35);
+  --glass-blur: 14px;
+  --border: #cfd8dc;
+  --text-main: #263238;
+  --muted: #90a4ae;
+}
+
+/* --------------------------------------------------
+   RESET & BASE
+-------------------------------------------------- */
+* {
+  box-sizing: border-box;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #e3f2fd, #ffffff);
+  color: var(--text-main);
+}
+
+/* --------------------------------------------------
+   NEO-GLASS PANEL STYLE
+-------------------------------------------------- */
+.glass-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* --------------------------------------------------
+   STICKY HEADER
+-------------------------------------------------- */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 14px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.company-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.company-website {
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+}
+
+.logo-wrapper img {
+  max-height: 55px;
+}
+
+/* --------------------------------------------------
+   PAGE WRAPPER
+-------------------------------------------------- */
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.date-wrapper {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+  font-size: 14px;
+}
+
+/* --------------------------------------------------
+   CALCULATOR CARD
+-------------------------------------------------- */
+.calculator-card {
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.calculator-header {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--primary);
+  margin-bottom: 14px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px 18px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.note {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+input[type="text"] {
+  padding: 10px 12px;
+  font-size: 15px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.8);
+  transition: 0.2s;
+}
+
+input[type="text"]:focus {
+  border-color: var(--primary);
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(30,136,229,0.15);
+}
+
+input[readonly] {
+  background: #f5f5f5;
+}
+
+/* --------------------------------------------------
+   ERROR INDICATORS
+-------------------------------------------------- */
+.input-error {
+  border-color: #d32f2f !important;
+  box-shadow: 0 0 0 3px rgba(211,47,47,0.2) !important;
+}
+
+.error-text {
+  font-size: 11px;
+  color: #d32f2f;
+  min-height: 14px;
+}
+
+/* --------------------------------------------------
+   BUTTONS
+-------------------------------------------------- */
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--primary);
+  color: #ffffff;
+  transition: 0.15s;
+}
+
+/* Floating hover effect (enabled only when OT Hours valid) */
+.btn.hover-enabled:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(30,136,229,0.35);
+}
+
+.btn-secondary {
+  background: #78909c;
+}
+
+.btn:active {
+  transform: scale(0.96);
+}
+
+.btn[disabled] {
+  background: #cfd8dc;
+  cursor: not-allowed;
+}
+
+/* --------------------------------------------------
+   AUTO CALCULATED SECTION
+-------------------------------------------------- */
+.auto-section {
+  display: none;
+  margin-top: 20px;
+  padding: 20px;
+}
+
+/* --------------------------------------------------
+   INVOICE SECTION
+-------------------------------------------------- */
+.result-wrapper {
+  display: none;
+  margin-top: 20px;
+}
+
+.invoice-card {
+  padding: 20px;
+}
+
+.invoice-header-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 10px;
+  margin-bottom: 18px;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.invoice-table th,
+.invoice-table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  text-align: right;
+}
+
+.invoice-table th:first-child,
+.invoice-table td:first-child {
+  text-align: left;
+}
+
+.total-row td {
+  font-weight: 700;
+  border-top: 2px solid var(--border);
+}
+
+/* --------------------------------------------------
+   SIGNATURE (PRINT ONLY)
+-------------------------------------------------- */
+.signature-wrapper {
+  margin-top: 120px;
+  display: none;
+}
+
+.signature-text {
+  border-top: 1px solid rgba(0,0,0,0.5);
+  padding-top: 4px;
+  font-size: 14px;
+}
+
+/* --------------------------------------------------
+   FOOTER
+-------------------------------------------------- */
+.screen-footer {
+  margin-top: 20px;
+  font-size: 12px;
+  text-align: right;
+  opacity: 0.25;
+}
+
+/* --------------------------------------------------
+   PRINT STYLES
+-------------------------------------------------- */
+@media print {
+
+  body {
+    background: #ffffff !important;
+  }
+
+  /* Hide calculator title */
+  .calculator-header {
+    display: none !important;
+  }
+
+  /* Replace auto-section with custom text */
+  .auto-section {
+    display: block !important;
+    padding: 14px !important;
+    border: 1px solid #cfd8dc !important;
+    height: auto !important;
+    background: none !important;
+    box-shadow: none !important;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 600;
+    color: #444;
+  }
+
+  .auto-section .form-group {
+    display: none !important;
+  }
+
+  .auto-section::before {
+    content: "Internal Calculation Reference";
+    display: block;
+    padding: 6px 0;
+  }
+
+  /* Header alignment fix */
+  .header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-direction: row !important;
+    box-shadow: none !important;
+    margin-bottom: 80px !important;
+  }
+
+  /* Hide UI elements */
+  .calculator-card,
+  .actions,
+  .screen-footer {
+    display: none !important;
+  }
+
+  .result-wrapper {
+    display: block !important;
+  }
+
+  .signature-wrapper {
+    display: block !important;
+  }
+
+  /* Watermark */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 30%;
+    left: 50%;
+    width: 500px;
+    height: 500px;
+    background-image: url('https://almoallam.com/wp-content/uploads/2020/09/leaf.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.06;
+    transform: translateX(-50%) rotate(-25deg);
+    z-index: -1;
+  }
+
+  /* Remove URL/“about:blank” */
+  a[href]:after {
+    content: "" !important;
+  }
+}
+
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header glass-card">
+    <div class="company-info">
+      <div class="company-name">
+        Abdulwahab M. Al Moallam Sons Company (CJSC)
+      </div>
+      <a class="company-website" href="https://almoallam.com/" target="_blank"></a>
+    </div>
+
+    <div class="logo-wrapper">
+      <a href="https://almoallam.com/" target="_blank">
+        <img src="https://almoallam.com/wp-content/uploads/2020/09/leaf.png">
+      </a>
+    </div>
+  </header>
+
+  <div class="date-wrapper">
+    <strong>Date:</strong>&nbsp;<span id="currentDate"></span>
+  </div>
+
+  <section class="calculator-card glass-card">
+    <div class="calculator-header">Salary & Overtime Calculator</div>
+
+    <div class="form-grid">
+
+      <div class="form-group">
+        <label class="form-label">Employee ID</label>
+        <input id="employeeId" type="text">
+        <div class="note">Only numbers allowed</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Employee Name</label>
+        <input id="employeeName" type="text">
+        <div class="note">Text only</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Basic Salary (SAR)</label>
+        <input id="basicSalary" type="text">
+        <div class="note">Mandatory</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Total OT Hours</label>
+        <input id="totalOtHours" type="text">
+        <div class="note">Mandatory</div>
+        <div id="otError" class="error-text"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Food Allowance (SAR)</label>
+        <input id="foodAllowance" type="text">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Other Allowance (SAR)</label>
+        <input id="otherAllowance" type="text">
+      </div>
+
+    </div>
+
+    <div class="actions">
+      <button id="resetBtn" class="btn btn-secondary">Reset / AC</button>
+      <button id="calculateBtn" class="btn">Calculate</button>
+      <button id="printBtn" class="btn" disabled>Print / PDF</button>
+    </div>
+  </section>
+
+  <section id="autoSection" class="auto-section glass-card">
+    <div class="form-grid">
+
+      <div class="form-group">
+        <label class="form-label">Hourly Rate</label>
+        <input id="hourlyRateBox" readonly>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">OT Rate</label>
+        <input id="otRateBox" readonly>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">OT Amount</label>
+        <input id="otAmountBox" readonly>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Total</label>
+        <input id="totalBox" readonly>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="resultWrapper" class="result-wrapper">
+    <div class="invoice-card glass-card">
+
+      <div class="invoice-header-row">
+        <div>
+          <strong>Employee Details</strong>
+          <div><strong>ID:</strong> <span id="summaryEmployeeId"></span></div>
+          <div><strong>Name:</strong> <span id="summaryEmployeeName"></span></div>
+        </div>
+
+        <div>
+          <strong>Print Date</strong>
+          <div id="summaryPrintDate"></div>
+        </div>
+      </div>
+
+      <table class="invoice-table">
+        <tr><td>Basic Salary</td><td id="summaryBasicSalary"></td></tr>
+        <tr><td>OT Amount</td><td id="summaryOtAmount"></td></tr>
+        <tr><td>Food Allowance</td><td id="summaryFoodAllowance"></td></tr>
+        <tr><td>Other Allowance</td><td id="summaryOtherAllowance"></td></tr>
+        <tr class="total-row"><td>Total</td><td id="summaryTotal"></td></tr>
+      </table>
+
+      <div class="signature-wrapper">
+        <div style="display:flex; justify-content:flex-end;">
+          <span class="signature-text">Authorized Signature</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="screen-footer">©Anisur Rahman</footer>
+
+</div>
+<script>
+
+/* --------------------------------------------------
+   Utility: Format number with commas + 2 decimals
+-------------------------------------------------- */
+function formatNumber(value) {
+  if (value === null || value === "" || isNaN(value)) return "";
+  const num = Number(value);
+  return num.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+}
+
+/* --------------------------------------------------
+   Utility: Convert formatted number back to float
+-------------------------------------------------- */
+function parseNumber(str) {
+  if (!str) return 0;
+  const cleaned = String(str).replace(/,/g, "").trim();
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? 0 : n;
+}
+
+/* --------------------------------------------------
+   Input Restrictions
+-------------------------------------------------- */
+function numericOnlyNoDecimal(e) {
+  const allowed = ["Backspace","Delete","ArrowLeft","ArrowRight","Tab","Home","End","Enter"];
+  if (allowed.includes(e.key)) return;
+  if (!/[0-9]/.test(e.key)) e.preventDefault();
+}
+
+function textOnly(e) {
+  const allowed = ["Backspace","Delete","ArrowLeft","ArrowRight","Tab","Home","End","Enter"," ",".","-","'"];
+  if (allowed.includes(e.key)) return;
+  if (!/[a-zA-Z]/.test(e.key)) e.preventDefault();
+}
+
+function decimalNumericOnly(e) {
+  const allowed = ["Backspace","Delete","ArrowLeft","ArrowRight","Tab","Home","End","Enter","."];
+  if (allowed.includes(e.key)) return;
+  if (!/[0-9]/.test(e.key)) e.preventDefault();
+}
+
+/* --------------------------------------------------
+   Button Animation
+-------------------------------------------------- */
+function animateButton(btn) {
+  btn.classList.remove("btn-animated");
+  void btn.offsetWidth;
+  btn.classList.add("btn-animated");
+}
+
+/* --------------------------------------------------
+   MAIN LOGIC
+-------------------------------------------------- */
+document.addEventListener("DOMContentLoaded", function () {
+
+  /* -----------------------------
+     INPUT ELEMENTS
+  ----------------------------- */
+  const employeeId = document.getElementById("employeeId");
+  const employeeName = document.getElementById("employeeName");
+  const basicSalary = document.getElementById("basicSalary");
+  const totalOtHours = document.getElementById("totalOtHours");
+  const foodAllowance = document.getElementById("foodAllowance");
+  const otherAllowance = document.getElementById("otherAllowance");
+
+  /* -----------------------------
+     AUTO-CALCULATED OUTPUTS
+  ----------------------------- */
+  const hourlyRateBox = document.getElementById("hourlyRateBox");
+  const otRateBox = document.getElementById("otRateBox");
+  const otAmountBox = document.getElementById("otAmountBox");
+  const totalBox = document.getElementById("totalBox");
+
+  /* -----------------------------
+     BUTTONS
+  ----------------------------- */
+  const calculateBtn = document.getElementById("calculateBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const printBtn = document.getElementById("printBtn");
+
+  /* -----------------------------
+     SECTIONS
+  ----------------------------- */
+  const autoSection = document.getElementById("autoSection");
+  const resultWrapper = document.getElementById("resultWrapper");
+
+  /* -----------------------------
+     ERROR ELEMENTS
+  ----------------------------- */
+  const otError = document.getElementById("otError");
+
+  /* -----------------------------
+     INVOICE SUMMARY FIELDS
+  ----------------------------- */
+  const summaryEmployeeId = document.getElementById("summaryEmployeeId");
+  const summaryEmployeeName = document.getElementById("summaryEmployeeName");
+  const summaryPrintDate = document.getElementById("summaryPrintDate");
+  const summaryBasicSalary = document.getElementById("summaryBasicSalary");
+  const summaryOtAmount = document.getElementById("summaryOtAmount");
+  const summaryFoodAllowance = document.getElementById("summaryFoodAllowance");
+  const summaryOtherAllowance = document.getElementById("summaryOtherAllowance");
+  const summaryTotal = document.getElementById("summaryTotal");
+
+  /* -----------------------------
+     AUTO-FILL TODAY'S DATE
+  ----------------------------- */
+  const currentDateSpan = document.getElementById("currentDate");
+  const today = new Date();
+  const dateOptions = { year: "numeric", month: "2-digit", day: "2-digit" };
+  const formattedDate = today.toLocaleDateString("en-GB", dateOptions);
+  currentDateSpan.textContent = formattedDate;
+
+  /* -----------------------------
+     ENTER-TO-NEXT NAVIGATION
+  ----------------------------- */
+  const orderedInputs = [
+    employeeId,
+    employeeName,
+    basicSalary,
+    totalOtHours,
+    foodAllowance,
+    otherAllowance
+  ];
+
+  orderedInputs.forEach(function (input) {
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const idx = orderedInputs.indexOf(e.target);
+        if (idx < orderedInputs.length - 1) {
+          orderedInputs[idx + 1].focus();
+        }
+      }
+    });
+  });
+
+  /* Auto-calc when pressing Enter on Other Allowance */
+  otherAllowance.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      calculateBtn.click();
+    }
+  });
+
+  /* -----------------------------
+     INPUT VALIDATION RULES
+  ----------------------------- */
+  employeeId.addEventListener("keydown", numericOnlyNoDecimal);
+  totalOtHours.addEventListener("keydown", numericOnlyNoDecimal);
+  employeeName.addEventListener("keydown", textOnly);
+
+  [basicSalary, foodAllowance, otherAllowance].forEach(el => {
+    el.addEventListener("keydown", decimalNumericOnly);
+  });
+
+  /* Format numbers on blur */
+  [basicSalary, foodAllowance, otherAllowance].forEach(el => {
+    el.addEventListener("blur", function () {
+      const value = parseNumber(el.value);
+      el.value = value ? formatNumber(value) : "";
+    });
+  });
+
+  totalOtHours.addEventListener("blur", function () {
+    totalOtHours.value = totalOtHours.value.replace(/[^0-9]/g, "");
+    updateButtonHoverState();
+  });
+
+  totalOtHours.addEventListener("input", updateButtonHoverState);
+
+  /* --------------------------------------------------
+     ENABLE/DISABLE FLOATING HOVER EFFECT
+-------------------------------------------------- */
+  function updateButtonHoverState() {
+    const otVal = parseInt(totalOtHours.value || "0", 10);
+    const buttons = [resetBtn, calculateBtn, printBtn];
+
+    if (otVal >= 1) {
+      buttons.forEach(btn => btn.classList.add("hover-enabled"));
+    } else {
+      buttons.forEach(btn => btn.classList.remove("hover-enabled"));
+    }
+  }
+
+  /* --------------------------------------------------
+     CALCULATION FUNCTION
+  -------------------------------------------------- */
+  function performCalculation() {
+
+    animateButton(calculateBtn);
+
+    const basicSalaryVal = parseNumber(basicSalary.value);
+    const otHoursVal = parseInt(totalOtHours.value || "0", 10);
+    const foodVal = parseNumber(foodAllowance.value);
+    const otherVal = parseNumber(otherAllowance.value);
+
+    let valid = true;
+
+    /* Validate Basic Salary */
+    if (!basicSalary.value.trim()) {
+      basicSalary.classList.add("input-error");
+      valid = false;
+    } else {
+      basicSalary.classList.remove("input-error");
+    }
+
+    /* Validate OT Hours */
+    if (!totalOtHours.value.trim() || otHoursVal < 1) {
+      totalOtHours.classList.add("input-error");
+      otError.textContent = "Total OT Hours must be at least 1.";
+      valid = false;
+    } else {
+      totalOtHours.classList.remove("input-error");
+      otError.textContent = "";
+    }
+
+    if (!valid) {
+      autoSection.style.display = "none";
+      resultWrapper.style.display = "none";
+      printBtn.disabled = true;
+      return;
+    }
+
+    /* Perform Calculations */
+    const hourlyRate = basicSalaryVal / 30 / 8;
+    const otRate = hourlyRate * 1.5;
+    const otAmount = otRate * otHoursVal;
+    const total = basicSalaryVal + otAmount + foodVal + otherVal;
+
+    /* Fill Auto-Calculated Section */
+    hourlyRateBox.value = formatNumber(hourlyRate);
+    otRateBox.value = formatNumber(otRate);
+    otAmountBox.value = formatNumber(otAmount);
+    totalBox.value = formatNumber(total);
+
+    autoSection.style.display = "block";
+
+    /* Fill Invoice Summary */
+    summaryEmployeeId.textContent = employeeId.value.trim() || "-";
+    summaryEmployeeName.textContent = employeeName.value.trim() || "-";
+    summaryPrintDate.textContent = formattedDate;
+
+    summaryBasicSalary.textContent = formatNumber(basicSalaryVal);
+    summaryOtAmount.textContent = formatNumber(otAmount);
+    summaryFoodAllowance.textContent = formatNumber(foodVal);
+    summaryOtherAllowance.textContent = formatNumber(otherVal);
+    summaryTotal.textContent = formatNumber(total);
+
+    resultWrapper.style.display = "block";
+    printBtn.disabled = false;
+
+    autoSection.scrollIntoView({ behavior: "smooth" });
+  }
+
+  calculateBtn.addEventListener("click", performCalculation);
+
+  /* --------------------------------------------------
+     PRINT HANDLER
+  -------------------------------------------------- */
+  printBtn.addEventListener("click", function () {
+    animateButton(printBtn);
+    window.print();
+  });
+
+  /* --------------------------------------------------
+     RESET FUNCTION
+  -------------------------------------------------- */
+  function doReset() {
+    animateButton(resetBtn);
+
+    orderedInputs.forEach(i => i.value = "");
+    hourlyRateBox.value = "";
+    otRateBox.value = "";
+    otAmountBox.value = "";
+    totalBox.value = "";
+
+    otError.textContent = "";
+    autoSection.style.display = "none";
+    resultWrapper.style.display = "none";
+    printBtn.disabled = true;
+
+    updateButtonHoverState();
+    employeeId.focus();
+  }
+
+  resetBtn.addEventListener("click", doReset);
+
+  /* SHIFT + Backspace = Reset */
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Backspace" && e.shiftKey) {
+      e.preventDefault();
+      doReset();
+    }
+  });
+
+});
+</script>
+</body>
+</html>
+
